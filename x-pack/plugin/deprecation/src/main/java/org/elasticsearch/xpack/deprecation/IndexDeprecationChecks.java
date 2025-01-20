@@ -36,12 +36,33 @@ public class IndexDeprecationChecks {
         // TODO: this check needs to be revised. It's trivially true right now.
         IndexVersion currentCompatibilityVersion = indexMetadata.getCompatibilityVersion();
         // We intentionally exclude indices that are in data streams because they will be picked up by DataStreamDeprecationChecks
-        if (DeprecatedIndexPredicate.reindexRequired(indexMetadata) && isNotDataStreamIndex(indexMetadata, clusterState)) {
+        if (DeprecatedIndexPredicate.reindexRequired(indexMetadata, false)
+            && isNotDataStreamIndex(indexMetadata, clusterState)) {
             return new DeprecationIssue(
                 DeprecationIssue.Level.CRITICAL,
                 "Old index with a compatibility version < 9.0",
                 "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
                 "This index has version: " + currentCompatibilityVersion.toReleaseVersion(),
+                false,
+                Collections.singletonMap("reindex_required", true)
+            );
+        }
+        return null;
+    }
+
+    static DeprecationIssue ignoredOldIndicesCheck(IndexMetadata indexMetadata, ClusterState clusterState) {
+        // TODO: this check needs to be revised. It's trivially true right now.
+        IndexVersion currentCompatibilityVersion = indexMetadata.getCompatibilityVersion();
+        // We intentionally exclude indices that are in data streams because they will be picked up by DataStreamDeprecationChecks
+        if (DeprecatedIndexPredicate.reindexRequired(indexMetadata, true)
+            && isNotDataStreamIndex(indexMetadata, clusterState)) {
+            return new DeprecationIssue(
+                DeprecationIssue.Level.WARNING,
+                "Old index with a compatibility version < 9.0 Has Been Ignored",
+                "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+                "This index has version: "
+                    + currentCompatibilityVersion.toReleaseVersion()
+                    + " and has been marked as OK to become read-only after upgrade",
                 false,
                 Collections.singletonMap("reindex_required", true)
             );

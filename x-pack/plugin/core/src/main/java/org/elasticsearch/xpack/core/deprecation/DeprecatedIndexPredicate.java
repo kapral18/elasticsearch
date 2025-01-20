@@ -26,23 +26,18 @@ public class DeprecatedIndexPredicate {
      *
      * It ignores searchable snapshots as they are not writable.
      */
-    public static Predicate<Index> getReindexRequiredPredicate(Metadata metadata) {
+    public static Predicate<Index> getReindexRequiredPredicate(Metadata metadata, boolean filterToBlockedStatus) {
         return index -> {
             IndexMetadata indexMetadata = metadata.index(index);
-            return reindexRequired(indexMetadata);
+            return reindexRequired(indexMetadata, filterToBlockedStatus);
         };
     }
 
-    public static boolean reindexRequired(IndexMetadata indexMetadata) {
+    public static boolean reindexRequired(IndexMetadata indexMetadata, boolean filterToBlockedStatus) {
         return creationVersionBeforeMinimumWritableVersion(indexMetadata)
             && isNotSearchableSnapshot(indexMetadata)
             && isNotClosed(indexMetadata)
-            && isNotVerifiedReadOnly(indexMetadata);
-    }
-
-    private static boolean isNotVerifiedReadOnly(IndexMetadata indexMetadata) {
-        // no need to check blocks.
-        return MetadataIndexStateService.VERIFIED_READ_ONLY_SETTING.get(indexMetadata.getSettings()) == false;
+            && matchBlockedStatus(indexMetadata, filterToBlockedStatus);
     }
 
     private static boolean isNotSearchableSnapshot(IndexMetadata indexMetadata) {
@@ -57,4 +52,7 @@ public class DeprecatedIndexPredicate {
         return indexMetadata.getState().equals(IndexMetadata.State.CLOSE) == false;
     }
 
+    private static boolean matchBlockedStatus(IndexMetadata indexMetadata, boolean filterToBlockedStatus) {
+        return MetadataIndexStateService.VERIFIED_READ_ONLY_SETTING.get(indexMetadata.getSettings()) == filterToBlockedStatus;
+    }
 }
