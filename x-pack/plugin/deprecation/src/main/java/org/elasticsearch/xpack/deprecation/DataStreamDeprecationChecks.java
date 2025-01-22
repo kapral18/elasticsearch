@@ -48,7 +48,7 @@ public class DataStreamDeprecationChecks {
     static DeprecationIssue ignoredOldIndicesCheck(DataStream dataStream, ClusterState clusterState) {
         List<Index> backingIndices = dataStream.getIndices();
 
-        Set<String> ignoredIndices = getReIndexRequiredIndices(backingIndices, clusterState, false);
+        Set<String> ignoredIndices = getReIndexRequiredIndices(backingIndices, clusterState, true);
 
         if (ignoredIndices.isEmpty() == false) {
             return new DeprecationIssue(
