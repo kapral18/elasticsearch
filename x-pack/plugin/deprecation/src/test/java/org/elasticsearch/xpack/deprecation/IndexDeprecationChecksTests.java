@@ -136,11 +136,7 @@ public class IndexDeprecationChecksTests extends ESTestCase {
     public void testOldIndicesIgnoredWarningCheck() {
         IndexVersion createdWith = IndexVersion.fromId(7170099);
         Settings.Builder settings = settings(createdWith).put(MetadataIndexStateService.VERIFIED_READ_ONLY_SETTING.getKey(), true);
-        IndexMetadata indexMetadata = IndexMetadata.builder("test")
-            .settings(settings)
-            .numberOfShards(1)
-            .numberOfReplicas(0)
-            .build();
+        IndexMetadata indexMetadata = IndexMetadata.builder("test").settings(settings).numberOfShards(1).numberOfReplicas(0).build();
         ClusterState clusterState = ClusterState.builder(ClusterState.EMPTY_STATE)
             .metadata(Metadata.builder().put(indexMetadata, true))
             .build();
@@ -148,9 +144,7 @@ public class IndexDeprecationChecksTests extends ESTestCase {
             DeprecationIssue.Level.WARNING,
             "Old index with a compatibility version < 9.0 Has Been Ignored",
             "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
-            "This index has version: "
-                + createdWith.toReleaseVersion()
-                + " and has been marked as OK to become read-only after upgrade",
+            "This index has version: " + createdWith.toReleaseVersion() + " and has been marked as OK to become read-only after upgrade",
             false,
             singletonMap("reindex_required", true)
         );
