@@ -252,14 +252,8 @@ public class DataStreamDeprecationChecksTests extends ESTestCase {
         }
 
         for (int i = 0; i < newIndexCount; i++) {
-            Settings.Builder settingsBuilder = settings(IndexVersion.current());
-            IndexMetadata newIndexMetadata = IndexMetadata.builder("new-data-stream-index-" + i)
-                .settings(settingsBuilder)
-                .numberOfShards(1)
-                .numberOfReplicas(0)
-                .build();
-            allIndices.add(newIndexMetadata.getIndex());
-            nameToIndexMetadata.put(newIndexMetadata.getIndex().getName(), newIndexMetadata);
+            Index newIndex = createNewIndex(i, false, nameToIndexMetadata);
+            allIndices.add(newIndex);
         }
 
         DataStream dataStream = new DataStream(
